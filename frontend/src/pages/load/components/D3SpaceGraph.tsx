@@ -280,6 +280,23 @@ export default function D3TreeGraph(props: D3TreeGraphProps) {
       .style("opacity", 1)
       .attr("transform", (d: D3Node) => `translate(${d.y},${d.x})`);
 
+    // Resize background & border rects to fit label text
+    // keep at least the configured nodeWidth
+    nodeUpdate.each(function (d: D3Node) {
+      const el = this as SVGGElement;
+      const labelNode = el.querySelector<SVGTextElement>(".node-label");
+      if (!labelNode) return;
+      const bbox = labelNode.getBBox();
+      const paddingLeft = 32; // matches label x
+      const paddingRight = 12;
+      const rectWidth = Math.max(
+        nodeWidth,
+        bbox.width + paddingLeft + paddingRight
+      );
+      d3.select(el).select(".node-bg").attr("width", rectWidth);
+      d3.select(el).select(".node-border").attr("width", rectWidth);
+    });
+
     nodeUpdate.select(".toggle-icon").text((d: D3Node) => {
       if (d.children) return "−";
       if (d._children) return "+";
@@ -441,6 +458,7 @@ export default function D3TreeGraph(props: D3TreeGraphProps) {
       .append("svg")
       .attr("width", "100%")
       .attr("height", initialHeight)
+      .attr("overflow", "visible")
       .style("background", "hsl(var(--background))")
       .style("border-radius", "8px");
 
